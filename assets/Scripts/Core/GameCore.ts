@@ -46,10 +46,14 @@ export class GameCore {
         this.isGameOver = false;
         this.mergePositionArray = new Array<Array<boolean>>(MaxRowAndCol);
         this.tempMergeArray = new Array<boolean>(MaxRowAndCol);
+        this.tempMergeArray.fill(false);
         for (let i = 0; i < MaxRowAndCol; i++) {
             this.map[i] = new Array<number>(MaxRowAndCol);
             this.beforeMoveMap[i] = new Array<number>(MaxRowAndCol);
             this.mergePositionArray[i] = new Array<boolean>(MaxRowAndCol);
+            this.map[i].fill(0);
+            this.beforeMoveMap[i].fill(0);
+            this.mergePositionArray[i].fill(false);
         }
     }
 
@@ -71,7 +75,7 @@ export class GameCore {
 
     //计分
     private mergeNumber() {
-        this.tempMergeArray.splice(0, this.tempMergeArray.length);
+        this.tempMergeArray.fill(false);
         this.removeZero();
         for (let i = 0; i < this.mergeArray.length - 1; i++) {
             if (this.mergeArray[i] != 0 && this.mergeArray[i] == this.mergeArray[i + 1]) {
@@ -88,8 +92,12 @@ export class GameCore {
         this.removeZero();
     }
 
+
     private upMove() {
-        this.mergePositionArray.splice(0, this.mergePositionArray.length);
+        for(let i=0;i<MaxRowAndCol;i++){
+            this.mergePositionArray[i].fill(false);
+        }
+        
         for (let c = 0; c < MaxRowAndCol; c++)   //遍历列
         {
             for (let r = 0; r < MaxRowAndCol; r++) {
@@ -105,7 +113,9 @@ export class GameCore {
     }
 
     private downMove() {
-        this.mergePositionArray.splice(0, this.mergePositionArray.length);
+        for(let i=0;i<MaxRowAndCol;i++){
+            this.mergePositionArray[i].fill(false);
+        }
         for (let c = 0; c < MaxRowAndCol; c++)   //遍历列
         {
             for (let r = 0; r < MaxRowAndCol; r++) {
@@ -120,7 +130,9 @@ export class GameCore {
     }
 
     private leftMove() {
-        this.mergePositionArray.splice(0, this.mergePositionArray.length);
+        for(let i=0;i<MaxRowAndCol;i++){
+            this.mergePositionArray[i].fill(false);
+        }
         for (let r = 0; r < MaxRowAndCol; r++)   //遍历行
         {
             for (let c = 0; c < MaxRowAndCol; c++) {
@@ -135,7 +147,9 @@ export class GameCore {
     }
 
     private rightMove() {
-        this.mergePositionArray.splice(0, this.mergePositionArray.length);
+        for(let i=0;i<MaxRowAndCol;i++){
+            this.mergePositionArray[i].fill(false);
+        }
         for (let r = 0; r < MaxRowAndCol; r++) {
             for (let c = 0; c < MaxRowAndCol; c++) {
                 this.mergeArray[c] = this.map[r][MaxRowAndCol - c - 1];
@@ -189,7 +203,7 @@ export class GameCore {
     //随机在空白处生成数组,  2  90% 4  10%
 
     private calculateEmpty() {
-        this.emptyLocationList.splice(0);
+        this.emptyLocationList.splice(0, this.emptyLocationList.length);
         for (let i = 0; i < MaxRowAndCol; i++) {
             for (let j = 0; j < MaxRowAndCol; j++) {
                 if (this.map[i][j] == 0) {

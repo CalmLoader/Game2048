@@ -1,4 +1,4 @@
-import { _decorator, Component, Node, SpriteComponent, tween, Vec3, v3, resources } from 'cc';
+import { _decorator, Component, Node, SpriteComponent, tween, Vec3, v3, resources, SpriteFrame } from 'cc';
 const { ccclass, property } = _decorator;
 
 @ccclass('NumberSprite')
@@ -6,16 +6,35 @@ export class NumberSprite extends Component {
 
     private sprite:SpriteComponent;
 
-    onLoad()
+    public async setImage(imgNumber:number)
     {
-        this.sprite = this.node.getComponent(SpriteComponent);
+        if(this.sprite == null){
+            this.sprite = this.node.getComponent(SpriteComponent);
+        }
+        //2->精灵->设置到Image中
+        let path = "Sprites/2048Atlas_" + imgNumber + "/spriteFrame";
+        this.sprite.spriteFrame = await this.loadSprite(path);
     }
 
-    public setImage(imgNumber:number)
-    {
-        //2->精灵->设置到Image中
-        resources.load("");
-        // this.sprite.spriteFrame = ResourceManager.LoadSprite(imgNumber);
+    public loadSprite(path: string) {
+        return new Promise<SpriteFrame>((resolve, reject) => {
+            if (path == "") {
+                reject("path is null");
+                return;
+            }
+            resources.load(path, SpriteFrame, (err, sprite: SpriteFrame) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                if (sprite) {
+                    resolve(sprite);
+                    return;
+                }
+                reject(err);
+                return;
+            })
+        });
     }
 
     //移动 合并 生成效果

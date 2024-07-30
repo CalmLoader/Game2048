@@ -16,3 +16,9 @@ export interface LocationData{
     location:Game2048Location,
     number:number
 }
+
+
+export enum AudioDef{
+    Merge = "Audio/merge",
+    Move = "Audio/move",
+}

@@ -1,6 +1,6 @@
-import { _decorator, Component, Node, Label, AudioSourceComponent, SpriteComponent, Vec2, AudioClip, input, Input, EventTouch } from 'cc';
+import { _decorator, Component, Node, Label, AudioSourceComponent, SpriteComponent, Vec2, AudioClip, input, Input, EventTouch, UITransform, Prefab, instantiate, Layout, resources } from 'cc';
 import { GameCore } from './Core/GameCore';
-import { Game2048Location, MaxRowAndCol, MoveDirection } from './Core/GameDef';
+import { AudioDef, Game2048Location, MaxRowAndCol, MoveDirection } from './Core/GameDef';
 import { NumberSprite } from './NumberSprite';
 const { ccclass, property } = _decorator;
 
@@ -14,12 +14,14 @@ export class GameController extends Component {
     public scoreText: Label = null;
     @property(Label)
     public maxScoreText: Label = null;
+    @property(Layout)
+    public gridLayout:Layout = null;
+
     @property(AudioSourceComponent)
     private audioSource: AudioSourceComponent;
 
-    @property(Array<AudioClip>)
-    public clips: Array<AudioClip> = new Array<AudioClip>(4);
-
+    @property(Prefab)
+    private gridPrefab:Prefab = null;
     private isMerge: boolean = false;
 
     onLoad() {
@@ -38,15 +40,16 @@ export class GameController extends Component {
     start() {
         this.core = new GameCore();
         this.numberSprites = new Array<Array<NumberSprite>>(MaxRowAndCol);
+        for (let i = 0; i < MaxRowAndCol; i++) {
+            this.numberSprites[i] = new Array<NumberSprite>(MaxRowAndCol);
+        }
+
         this.init();
         this.generateNewNumber();
         this.generateNewNumber();
         this.scoreText.string = "0";
         this.maxScoreText.string = "0";
         this.audioSource = this.node.getComponent(AudioSourceComponent);
-        for (let i = 0; i < MaxRowAndCol; i++) {
-            this.numberSprites[i] = new Array<NumberSprite>(MaxRowAndCol);
-        }
     }
 
     update(deltaTime: number) {
@@ -75,12 +78,13 @@ export class GameController extends Component {
 
     //创建一个精灵
     private createSprite(r: number, c: number) {
-        let node = new Node(r.toString() + c.toString());
-        node.addComponent(SpriteComponent);
-        let action: NumberSprite = node.addComponent(NumberSprite);  //Onload立即执行   Start下一帧执行
+        let node = instantiate(this.gridPrefab);
+        let action = node.getComponent(NumberSprite);
         this.numberSprites[r][c] = action;
-        action.setImage(0);
-        node.parent = this.node;
+        if(action){
+            action.setImage(0);
+        }
+        node.parent = this.gridLayout.node;
     }
 
     private generateNewNumber(): void {
@@ -88,10 +92,10 @@ export class GameController extends Component {
         //数字?
 
         let locationData = this.core.generateNumber();
-
         if (locationData != null) {
             let loc: Game2048Location = locationData.location;
             let number: number = locationData.number;
+            console.log(number);
             //根据精灵行为引用进行设置
             this.numberSprites[loc.rIndex][loc.cIndex].setImage(number);
             this.numberSprites[loc.rIndex][loc.cIndex].createEffect();
@@ -113,9 +117,40 @@ export class GameController extends Component {
         }
         if (this.isMerge) {
             this.scoreText.string = this.core.Score.toString();
-            this.audioSource.playOneShot(this.clips[1]);
+            this.playAudio(AudioDef.Merge);
         }
     }
+
+    private async playAudio(audio:AudioDef){
+        let clip = await this.loadAudio(audio);
+        if(clip){
+            this.audioSource.playOneShot(clip);
+        }
+    }
+
+
+    public loadAudio(path: string) {
+        return new Promise<AudioClip>((resolve, reject) => {
+            if (path == "") {
+                reject("path is null");
+                return;
+            }
+            resources.load(path, AudioClip, (err, sprite: AudioClip) => {
+                if (err) {
+                    reject(err);
+                    return;
+                }
+                if (sprite) {
+                    resolve(sprite);
+                    return;
+                }
+                reject(err);
+                return;
+            })
+        });
+    }
+
+
 
 
     private isDown: boolean = false;
@@ -146,7 +181,7 @@ export class GameController extends Component {
         }
         if (dir != null) {
             this.core.move(dir);
-            this.audioSource.playOneShot(this.clips[0]);
+            this.playAudio(AudioDef.Move);
             this.isDown = false;
         }
     }
