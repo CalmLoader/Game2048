@@ -22,3 +22,7 @@ export enum AudioDef{
     Merge = "Audio/merge",
     Move = "Audio/move",
 }
+
+export enum CookieDef{
+    HighestScore = "CookieDef_HighestScore"
+}

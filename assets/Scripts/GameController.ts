@@ -1,6 +1,7 @@
-import { _decorator, Component, Node, Label, AudioSourceComponent, SpriteComponent, Vec2, AudioClip, input, Input, EventTouch, UITransform, Prefab, instantiate, Layout, resources } from 'cc';
+import { _decorator, Component, Node, Label, AudioSourceComponent, SpriteComponent, Vec2, AudioClip, input, Input, EventTouch, UITransform, Prefab, instantiate, Layout, resources, sys } from 'cc';
+import { CommonLibrary } from './CommonLibrary';
 import { GameCore } from './Core/GameCore';
-import { AudioDef, Game2048Location, MaxRowAndCol, MoveDirection } from './Core/GameDef';
+import { AudioDef, CookieDef, Game2048Location, MaxRowAndCol, MoveDirection } from './Core/GameDef';
 import { NumberSprite } from './NumberSprite';
 const { ccclass, property } = _decorator;
 
@@ -48,7 +49,8 @@ export class GameController extends Component {
         this.generateNewNumber();
         this.generateNewNumber();
         this.scoreText.string = "0";
-        this.maxScoreText.string = "0";
+        let highestScore = CommonLibrary.GetIntPersistenceData(CookieDef.HighestScore, 0);
+        this.maxScoreText.string = highestScore.toString();
         this.audioSource = this.node.getComponent(AudioSourceComponent);
     }
 
@@ -117,6 +119,12 @@ export class GameController extends Component {
         }
         if (this.isMerge) {
             this.scoreText.string = this.core.Score.toString();
+            let highestScore = CommonLibrary.GetIntPersistenceData(CookieDef.HighestScore, 0);
+            if(this.core.Score > highestScore){
+                highestScore = this.core.Score;
+                this.maxScoreText.string = highestScore.toString();
+                sys.localStorage.setItem(CookieDef.HighestScore, highestScore.toString());
+            }
             this.playAudio(AudioDef.Merge);
         }
     }
