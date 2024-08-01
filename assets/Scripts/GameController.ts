@@ -158,9 +158,6 @@ export class GameController extends Component {
         });
     }
 
-
-
-
     private isDown: boolean = false;
     private offset: Vec2;
     private startPoint: Vec2;
@@ -189,6 +186,13 @@ export class GameController extends Component {
         }
         if (dir != null) {
             this.core.move(dir);
+            for(let i=0;i<MaxRowAndCol;i++){
+                for(let j=0;j<MaxRowAndCol;j++){
+                    if(this.core.MovePositionArray[i][j]){
+                        this.numberSprites[i][j].createEffect3(dir);
+                    }
+                }
+            }
             this.playAudio(AudioDef.Move);
             this.isDown = false;
         }

@@ -10,10 +10,16 @@ export class GameCore {
     private beforeMoveMap: Array<Array<number>>;
     private isGameOver: boolean;
     private mergePositionArray: Array<Array<boolean>>;
+    private movePositionArray:Array<Array<boolean>>;
     private tempMergeArray: Array<boolean>;
+    private tempMoveArray:Array<boolean>;
 
     public get MergePositionArray() {
         return this.mergePositionArray;
+    }
+
+    public get MovePositionArray() {
+        return this.movePositionArray;
     }
 
     public get IsChange() {
@@ -45,15 +51,20 @@ export class GameCore {
         this.score = 0;
         this.isGameOver = false;
         this.mergePositionArray = new Array<Array<boolean>>(MaxRowAndCol);
+        this.movePositionArray = new Array<Array<boolean>>(MaxRowAndCol);
         this.tempMergeArray = new Array<boolean>(MaxRowAndCol);
         this.tempMergeArray.fill(false);
+        this.tempMoveArray = new Array<boolean>(MaxRowAndCol);
+        this.tempMoveArray.fill(false);
         for (let i = 0; i < MaxRowAndCol; i++) {
             this.map[i] = new Array<number>(MaxRowAndCol);
             this.beforeMoveMap[i] = new Array<number>(MaxRowAndCol);
             this.mergePositionArray[i] = new Array<boolean>(MaxRowAndCol);
+            this.movePositionArray[i] = new Array<boolean>(MaxRowAndCol);
             this.map[i].fill(0);
             this.beforeMoveMap[i].fill(0);
             this.mergePositionArray[i].fill(false);
+            this.movePositionArray[i].fill(false);
         }
     }
 
@@ -65,6 +76,7 @@ export class GameCore {
                         this.temp = this.mergeArray[i];
                         this.mergeArray[i] = this.mergeArray[j];
                         this.mergeArray[j] = this.temp;
+                        this.tempMoveArray[j] = true;
                         break;
                     }
                 }
@@ -76,6 +88,7 @@ export class GameCore {
     //计分
     private mergeNumber() {
         this.tempMergeArray.fill(false);
+        this.tempMoveArray.fill(false);
         this.removeZero();
         for (let i = 0; i < this.mergeArray.length - 1; i++) {
             if (this.mergeArray[i] != 0 && this.mergeArray[i] == this.mergeArray[i + 1]) {
@@ -96,6 +109,7 @@ export class GameCore {
     private upMove() {
         for(let i=0;i<MaxRowAndCol;i++){
             this.mergePositionArray[i].fill(false);
+            this.movePositionArray[i].fill(false);
         }
         
         for (let c = 0; c < MaxRowAndCol; c++)   //遍历列
@@ -107,6 +121,7 @@ export class GameCore {
             for (let r = 0; r < MaxRowAndCol; r++) {
                 this.map[r][c] = this.mergeArray[r];
                 this.mergePositionArray[r][c] = this.tempMergeArray[r];
+                this.movePositionArray[r][c] = this.tempMoveArray[r];
             }
         }
 
@@ -115,6 +130,7 @@ export class GameCore {
     private downMove() {
         for(let i=0;i<MaxRowAndCol;i++){
             this.mergePositionArray[i].fill(false);
+            this.movePositionArray[i].fill(false);
         }
         for (let c = 0; c < MaxRowAndCol; c++)   //遍历列
         {
@@ -125,6 +141,7 @@ export class GameCore {
             for (let r = 0; r < MaxRowAndCol; r++) {
                 this.map[MaxRowAndCol - r - 1][c] = this.mergeArray[r];
                 this.mergePositionArray[MaxRowAndCol - r - 1][c] = this.tempMergeArray[r];
+                this.movePositionArray[MaxRowAndCol - r - 1][c] = this.tempMoveArray[r];
             }
         }
     }
@@ -132,6 +149,7 @@ export class GameCore {
     private leftMove() {
         for(let i=0;i<MaxRowAndCol;i++){
             this.mergePositionArray[i].fill(false);
+            this.movePositionArray[i].fill(false);
         }
         for (let r = 0; r < MaxRowAndCol; r++)   //遍历行
         {
@@ -142,6 +160,7 @@ export class GameCore {
             for (let c = 0; c < MaxRowAndCol; c++) {
                 this.map[r][c] = this.mergeArray[c];
                 this.mergePositionArray[r][c] = this.tempMergeArray[c];
+                this.movePositionArray[r][c] = this.tempMoveArray[c];
             }
         }
     }
@@ -149,6 +168,7 @@ export class GameCore {
     private rightMove() {
         for(let i=0;i<MaxRowAndCol;i++){
             this.mergePositionArray[i].fill(false);
+            this.movePositionArray[i].fill(false);
         }
         for (let r = 0; r < MaxRowAndCol; r++) {
             for (let c = 0; c < MaxRowAndCol; c++) {
@@ -159,6 +179,7 @@ export class GameCore {
             for (let c = 0; c < MaxRowAndCol; c++) {
                 this.map[r][MaxRowAndCol - c - 1] = this.mergeArray[c];
                 this.mergePositionArray[r][MaxRowAndCol - c - 1] = this.tempMergeArray[c];
+                this.movePositionArray[r][MaxRowAndCol - c - 1] = this.tempMoveArray[c];
             }
         }
     }

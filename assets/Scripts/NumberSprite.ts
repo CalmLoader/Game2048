@@ -1,10 +1,16 @@
-import { _decorator, Component, Node, SpriteComponent, tween, Vec3, v3, resources, SpriteFrame } from 'cc';
+import { _decorator, Component, Node, SpriteComponent, tween, Vec3, v3, resources, SpriteFrame, Prefab, instantiate, UIOpacity, UITransform } from 'cc';
+import { MoveDirection } from './Core/GameDef';
 const { ccclass, property } = _decorator;
 
 @ccclass('NumberSprite')
 export class NumberSprite extends Component {
 
     private sprite:SpriteComponent;
+
+    @property(Prefab)
+    private gridPrefab:Prefab = null;
+
+    private animNode:Node = null;
 
     public async setImage(imgNumber:number)
     {
@@ -48,6 +54,34 @@ export class NumberSprite extends Component {
     {
         tween(this.node).set({scale:v3(1.2,1.2,1.2)}).to(0.3,{scale:Vec3.ONE},{easing:'backOut'}).start();
     }
+
+    //移动动画
+    public createEffect3(dir: MoveDirection) {
+        if(!this.animNode){
+            this.animNode = instantiate(this.gridPrefab);
+            this.animNode.getComponent(NumberSprite).setImage(0);
+            this.animNode.parent = this.node.parent.parent;
+        }
+        if(!this.animNode){
+            return;
+        }
+        let curGlobal = this.node.parent.getComponent(UITransform).convertToWorldSpaceAR(this.node.position);
+        let curPos = this.node.parent.parent.getComponent(UITransform).convertToNodeSpaceAR(curGlobal);
+        let uiOp = this.animNode.getComponent(UIOpacity);
+        switch (dir) {
+            case MoveDirection.Up:
+                tween(this.animNode).set({position:curPos}).to(0.3,{position:v3(curPos.x, curPos.y+5)},{easing:'backOut'}).start();
+                break;
+            case MoveDirection.Down:
+                tween(this.animNode).set({position:curPos}).to(0.3,{position:v3(curPos.x, curPos.y-5)},{easing:'backOut'}).start();
+                break;
+            case MoveDirection.Left:
+                tween(this.animNode).set({position:curPos}).to(0.3,{position:v3(curPos.x-5, curPos.y)},{easing:'backOut'}).start();
+                break;
+            case MoveDirection.Right:
+                tween(this.animNode).set({position:curPos}).to(0.3,{position:v3(curPos.x+5, curPos.y)},{easing:'backOut'}).start();
+                break;
+        }
+        tween(uiOp).set({opacity:255}).to(0.3,{opacity:0},{easing:'backOut'}).start();
+    }
 }
-
-
